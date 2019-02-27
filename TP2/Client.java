@@ -21,10 +21,12 @@ public class Client {
                         message, message.length, localhost, Integer.parseInt(args[1]));
                 socket.send(out);
 
-                byte[] inBytes = new  byte[25];
+
+				/** Cas où le serveur renvoi un message*/
+                /*byte[] inBytes = new  byte[25];
                 DatagramPacket inPacket = new DatagramPacket(inBytes, inBytes.length);
                 socket.receive(inPacket);
-                System.out.println(new String(inPacket.getData(), 0, inPacket.getLength()));
+                System.out.println(new String(inPacket.getData(), 0, inPacket.getLength()));*/
             }
 
         } catch (Exception e) {

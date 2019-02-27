@@ -3,20 +3,21 @@ import java.net.*;
 public class Server {
     public static void main(String[] args) {
         try {
-            DatagramSocket socket = new DatagramSocket(1234);
+        	if(args.length < 1) {
+        		throw new Exception("Not enough args : need a port");
+        	}
+        
+            DatagramSocket socket = new DatagramSocket(Integer.parseInt(args[0]));
             byte[] messagebyte = new byte[25];
             DatagramPacket in = new DatagramPacket(messagebyte, 25);
 
             while (true) {
                 socket.receive(in);
-                String left = new String(
+                String message = new String(
                         in.getData(), in.getOffset(), in.getLength());
 
-                String message = "> " + left;
-                DatagramPacket out = new DatagramPacket(
-                        message.getBytes(), message.getBytes().length, in.getAddress(), in.getPort());
-                socket.send(out);
-            }
+                System.out.print("> "+ message);
+			}
 
         } catch (Exception e) {
             e.printStackTrace();
