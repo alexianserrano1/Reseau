@@ -8,10 +8,47 @@
 
 1.3 Serveur Ipv6 
 
-3) La connexion est établie avec nc -6 ::1 1234 car le serveur est compatible avec autant ipv4 que ipv6
-
+3) La connexion est établie avec nc -6 ::1 1234 car le serveur est compatible avec autant ipv4 que ipv6. Il semble que Java fasse la gestion des adresses.
 
 1.4 
 
 fe80::6600:6aff:fe5a:ec5a
+
+2.1 Definition
+
+La double pile IP est la duplication des toutes les couches de protocoles.
+Cela permet d'utiliser les même protocoles de transport pour IPv4 et IPv6, les 2 types d'adresse IP sont gérer.
+
+2.2 
+
+Si on lui donne directement une adresse, le client est capable de voir la difference entre une adresse IPv4 et IPv6 et fait donc le choix en analysant l'adresse.
+
+
+
+2.3
+
+Notre serveur écoute sur : 
+	localhost:domain  0.0.0.0.*
+	localhost:8118    0.0.0.0.*
+	localhost:ipp     0.0.0.0.*
+	localhost:9050    0.0.0.0.*
+	ip6-localhost:ipp [::]:*
+
+Ce qui semble etre uniquement l'adresse localhost.
+
+Pour qu'un serveur ecoute uniquement sur une unique adresse, il faut
+
+.preferIpv4Stack restreint la communication en empechant de communiquer avec des hotes qui utilisent uniquement des adresses IPv6. Cela peut etre utile pour un application utilisant uniquement des sockets IPv4.
+
+.preferIPv6Addresses change la preference de base, qui est de favoriser un communication via IPv4, pour favoriser une communication par adresses IPv6 si c'est possible.
+
+Pour configurer un serveur uniquement en IPv4, il faut mettre la ca figuration java.net.preferIPv4stack à 'true'.
+
+Pour configurer un serveur uniquement en IPv6, 
+
+Avoir un serveur simple pile peut etre utile pour une application qui ne peut gérer qu'un seul type d'adresse par exemple.
+
+
+2.4
+
 
