@@ -17,24 +17,12 @@ public class ClientTCP {
                             socket.getOutputStream()));
             Scanner inFromUser = new Scanner(System.in);
 
-
             while(inFromUser.hasNextLine()) {
                 String message=inFromUser.nextLine();
                 outToServer.write(message+"\n");
                 outToServer.flush();
-                String recu = inFromServer.readLine();
-                System.out.println(recu);
-
-
             }
-
-
-
             socket.close();
-
-
-
-
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
