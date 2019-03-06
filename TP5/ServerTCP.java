@@ -45,10 +45,11 @@ public class ServerTCP {
                                 clientSocket.getOutputStream()));
                 while(true) {
                     String message = inFromClient.readLine();
-                    if (message == "Deconnexion" || message == null) {
+                    if (message == null) {
                         System.out.println("Deconnexion client " + numClient);
                         clientSocket.close();
-                    }
+						break;                    
+					}
                     System.out.println("Client " + numClient+ " > " + message + "" + numClient);
                     outToClient.write("Connexion établie \n");
                     outToClient.flush();
