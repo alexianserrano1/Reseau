@@ -1,0 +1,9 @@
+1.2 Serveur Simple
+
+Le serveur ayant un unique appel à la fonction 'accept()', un seul client peut se connecter au serveur.
+
+1.3 Solutions 
+
+L'utilisation de 'fils' c'est à dire des threads pouvant éxecuter des tâches en parallèle.
+
+ 
