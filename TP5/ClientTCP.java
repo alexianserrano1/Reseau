@@ -1,3 +1,5 @@
+package TP5.real;
+
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
@@ -18,16 +20,13 @@ public class ClientTCP {
                             socket.getOutputStream()));
             Scanner inFromUser = new Scanner(System.in);
 
-            String message= "Connexion client ";
+            String message = "Je suis un client";
             outToServer.write(message+"\n");
             outToServer.flush();
 
-            String reçu = inFromServer.readLine();
-
-            outToServer.write("Deconnexion");
-            outToServer.flush();
-
+            inFromServer.readLine();
             socket.close();
+
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

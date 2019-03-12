@@ -1,11 +1,16 @@
+package TP5.real;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 public class Stress1 {
     public static void main(String[] args) {
         String[] arguments = {"localhost", "1234"};
         int clientNumber = Integer.parseInt(args[0]);
 
         for(int index = 0; index < clientNumber; index++) {
-            Thread thread = new Thread(new StressHandler(arguments));
-            thread.start();
+            Executor executor = Executors.newSingleThreadExecutor();
+            executor.execute(new StressHandler(arguments));
         }
     }
 
