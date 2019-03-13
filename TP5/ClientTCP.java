@@ -1,5 +1,3 @@
-package TP5.real;
-
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;

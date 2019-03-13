@@ -1,5 +1,3 @@
-package TP5.real;
-
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 

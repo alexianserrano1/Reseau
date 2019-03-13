@@ -1,9 +1,4 @@
-package TP5.real;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
@@ -19,40 +14,52 @@ public class ServerTCP {
             String arg1 = args[0];
 
             int clientCount = 0;
-            ServerSocket serverSocket = new ServerSocket(Integer.parseInt(args[0]));
+            ServerSocket serverSocket; /*= new ServerSocket(Integer.parseInt(args[0]));*/
 
-            /*while(true) {
-                clientCount++;
-                long startTime = System.nanoTime();
-                switch (arg1) {
-                    case "-t":
-                        serverSocket = new ServerSocket(Integer.parseInt(args[2]));
+            switch (arg1) {
+                case "-t":
+                    serverSocket = new ServerSocket(Integer.parseInt(args[2]));
+                    while(true) {
+                        clientCount ++;
+                        long startTime = System.nanoTime();
                         Executors.newFixedThreadPool(Integer.parseInt(args[1])).execute(
                                 new ClientHandler(serverSocket.accept(), clientCount));
-                        break;
+                        long estimatedTime = System.nanoTime() - startTime;
+                    }
+                case "-s":
+                    serverSocket = new ServerSocket(Integer.parseInt(args[1]));
+                    while(true) {
+                        clientCount ++;
+                        long startTime = System.nanoTime();
+                        Executors.newWorkStealingPool().execute(
+                                new ClientHandler(serverSocket.accept(), clientCount));
+                        long estimatedTime = System.nanoTime() - startTime;
+                    }
                     default:
                         serverSocket = new ServerSocket(Integer.parseInt(args[0]));
-                        Executors.newCachedThreadPool().execute(
-                                new ClientHandler(serverSocket.accept(), clientCount));
-                        break;
+                        while(true) {
+                            clientCount ++;
+                            long startTime = System.nanoTime();
+                            Executors.newCachedThreadPool().execute(
+                                    new ClientHandler(serverSocket.accept(), clientCount));
+                            long estimatedTime = System.nanoTime() - startTime;
+                        }
                 }
-                long estimatedTime = System.nanoTime() - startTime;
-            }*/
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
 
-            /** ancienne version */
-            while(true) {
+        /** ancienne version */
+            /*while(true) {
                 clientCount ++;
                 long startTime = System.nanoTime();
                 Executor executor = Executors.newSingleThreadExecutor();
                 executor.execute(new ClientHandler(serverSocket.accept(), clientCount));
                 long estimatedTime = System.nanoTime() - startTime;
-             }
+             }*/
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
 
     static class ClientHandler implements Runnable{
         Socket clientSocket;
