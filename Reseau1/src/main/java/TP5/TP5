@@ -1,0 +1,28 @@
+1.2 Serveur Simple
+
+Le serveur ayant un unique appel à la fonction 'accept()', un seul client peut se connecter au serveur.
+
+1.3 Solutions 
+
+L'utilisation de 'fils' c'est à dire des threads pouvant éxecuter des tâches en parallèle.
+
+ 
+2.2 Test de performance 1
+
+Dans le cas où les clients ne se ferment pas, tout se passe bien jusqu'aux 1000 clients simultanés où on constate que le des clients sont
+déconnectés automatiquement. On peut supposer que c'est une sécurité de la mémoire.
+
+Dans le second cas, étant donné que l'on deconnecte chaque client juste après l'envoi de son message, le serveur accepte plus rapidement les
+connexions.
+
+Finalement si on execute en parallèle 5 fois le programme Stress1 avec 1000 clients chacun, la vitesse de connexions des clients est plus
+rapide que précèdemment.
+
+3. Pool de Threads
+
+Dans le cas des CachedThreadPool, la différence entre les deux signatures de méthodes est que celle utilisant une ThreadFactory s'en sert
+lors de la création de nouveau thread
+
+Pour la méthode FixedThreadPool, il existe aussi deux signatures avec la même différence que précèdemment, c'est à dire une parametre supplémentaire
+qui est une ThreadFactory permettant de créer simplement un nouveau thread.
+
