@@ -37,8 +37,10 @@ public class ClientStdout implements Runnable {
             }
 
             semaphore.acquire();
-            if(!socket.isClosed())
+            if(!socket.isClosed()) {
                 socket.close();
+                System.exit(0);
+            }
             semaphore.release();
 
         } catch (Exception e) {
