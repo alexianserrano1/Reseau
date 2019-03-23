@@ -22,8 +22,8 @@ public class ServerSelect {
 
             for(;;) {
                 selector.select();
-                Set<SelectionKey> selectkeys = selector.selectedKeys();
-                Iterator<SelectionKey> iterator = selectkeys.iterator();
+                Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                Iterator<SelectionKey> iterator = selectedKeys.iterator();
                 ByteBuffer buffer = ByteBuffer.allocate(256);
 
                 while(iterator.hasNext()) {
