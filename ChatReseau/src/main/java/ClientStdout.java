@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.Semaphore;
 
 public class ClientStdout implements Runnable {
@@ -33,7 +34,7 @@ public class ClientStdout implements Runnable {
                     System.out.println("Server> Fin de connexion");
                     break;
                 }
-                System.out.println("Server> "+ message);
+                System.out.println("Server> "+ message.trim());
             }
 
             semaphore.acquire();
@@ -43,8 +44,11 @@ public class ClientStdout implements Runnable {
             }
             semaphore.release();
 
+        } catch (SocketException se) {
+            System.out.println("Fermeture du stdout");
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("stdout");
             System.exit(1);
         }
 

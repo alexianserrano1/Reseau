@@ -26,30 +26,31 @@ public class ClientStdin implements Runnable {
             outToServer.write("CONNECT "+ pseudo +"\n");
             outToServer.flush();
 
-            while(true) {
+            while(inFromUser.hasNextLine()) {
                 semaphore.acquire();
                 if(socket.isClosed()) {
                     semaphore.release();
                     break;
                 }
                 semaphore.release();
-                System.out.println("aaaaaaaaaaaaa");
-                if(inFromUser.hasNextLine()) {
-                    String message = inFromUser.nextLine();
 
-                    outToServer.write(message + "\n");
-                    outToServer.flush();
-                }
+
+                String message = inFromUser.nextLine();
+
+                outToServer.write(message + "\n");
+                outToServer.flush();
+
             }
-            System.out.println("aaaaaaaaaaaaa");
             semaphore.acquire();
-            System.out.println("bbbbbbbbbbbb");
-            if(!socket.isClosed())
+            if(!socket.isClosed()) {
                 socket.close();
+                System.exit(0);
+            }
             semaphore.release();
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("stdin");
             System.exit(1);
         }
 
