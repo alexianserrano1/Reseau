@@ -34,7 +34,10 @@ public class ClientStdout implements Runnable {
                     System.out.println("Server> Fin de connexion");
                     break;
                 }
-                System.out.println("Server> "+ message.trim());
+                if(message.startsWith("SERVER:"))
+                    System.out.println("Server> "+ message.substring(7).trim());
+                else
+                    System.out.println(message.trim());
             }
 
             semaphore.acquire();
@@ -45,10 +48,9 @@ public class ClientStdout implements Runnable {
             semaphore.release();
 
         } catch (SocketException se) {
-            System.out.println("Fermeture du stdout");
+            System.out.println("Vous quittez le seveur");
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("stdout");
             System.exit(1);
         }
 

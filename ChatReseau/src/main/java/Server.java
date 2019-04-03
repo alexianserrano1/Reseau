@@ -1,8 +1,8 @@
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -17,10 +17,11 @@ public class Server {
         return msg.substring(0, index);
     }
 
-    private void broadcast(ConnectionProfil profil, String msg) {
+    private void broadcastExcept(ConnectionProfil profil, String msg) {
         for(int index = 0; index < profiles.size(); index++) {
-            if(profiles.get(index).equals(profil))
+            if(profiles.get(index).equals(profil)) {
                 continue;
+            }
             profiles.get(index).addMsgToQueue(msg);
         }
     }
@@ -28,6 +29,7 @@ public class Server {
     private void createProfile(SocketChannel sc, Selector s) throws IOException {
         ConnectionProfil profile = new ConnectionProfil(sc);
         profile.getSocket().register(s, SelectionKey.OP_READ, profile);
+        profile.setKey(profile.getSocket().keyFor(s));
         profiles.add(profile);
     }
 
@@ -41,45 +43,48 @@ public class Server {
         return (p.getSocket().read(buffer) < 0);
     }
 
-    private void cancelKey(SelectionKey key) {
-        key.cancel();
-        buffer.clear();
-    }
-
-    private boolean isAlreadyConnected(ConnectionProfil profil) {
-        for(ConnectionProfil p : profiles) {
-            if(profil.equals(p)) return true;
-        }
-        return false;
-    }
-
     private void readMessage(ConnectionProfil profile, Selector s) throws IOException {
         String messageRecv = getMessage(buffer);
         if (!messageRecv.equals("")) {
             String pseudo;
+            System.out.println(messageRecv);
             if (messageRecv.startsWith("CONNECT")) {
-                if (isAlreadyConnected(profile)) {
-
-                } else {
+                if (profile.isConnected) {
+                    profile.addMsgToQueue("SERVER: ERROR CONNECT aborting clavardamu protocol.\n");
+                }
+                else {
                     pseudo = messageRecv.substring(8).trim();
                     profile.setPseudo(pseudo);
-                    profile.getSocket().register(s, SelectionKey.OP_WRITE, profile);
-                    broadcast(profile, "Connexion de " + pseudo);
+                    profile.setConnected();
+                    profile.getSocket().register(s, SelectionKey.OP_READ | SelectionKey.OP_WRITE, profile);
+                    broadcastExcept(profile, "SERVER: Connexion de " + pseudo + "\n");
                 }
             }
             else if(messageRecv.startsWith("MSG")){
-                pseudo = profile.getPseudo();
-                broadcast(profile, pseudo + "> " + messageRecv.substring(4));
+                if(profile.isConnected) {
+                    pseudo = profile.getPseudo();
+                    broadcastExcept(profile, pseudo + "> " + messageRecv.substring(4)+"\n");
+                }
+                else {
+                    System.out.println("11111111");
+                    profile.addMsgToQueue("SERVER: ERROR clavardamu.\n");
+                }
             }
+            else {
+                System.out.println("22222222");
 
+                profile.addMsgToQueue("SERVER: ERROR clavardamu.\n"); }
         }
+        buffer.flip();
     }
 
     private void readKey(SelectionKey key, Selector s) throws IOException {
         ConnectionProfil profile = (ConnectionProfil) key.attachment();
 
         if(bufferIsEmpty(profile)) {
-            cancelKey(key);
+            profile.isConnected = false;
+            profiles.remove(profile);
+            profile.getSocket().close();
             return;
         }
         else { readMessage(profile, s); }
@@ -89,14 +94,14 @@ public class Server {
     private void writeKey(SelectionKey key, Selector s) throws IOException {
         ConnectionProfil profil = (ConnectionProfil) key.attachment();
         String msg = profil.popMessage();
-        System.out.println(msg);
         if (msg != null) {
-            System.out.println(msg);
+            buffer.clear();
             buffer.put(msg.getBytes());
+            buffer.flip();
             profil.getSocket().write(buffer);
         }
-        buffer.clear();
-        profil.getSocket().register(s, SelectionKey.OP_READ, profil);
+        if(profil.queue.isEmpty())
+            key.interestOps(SelectionKey.OP_READ);
     }
 
     public void start() {
@@ -115,9 +120,10 @@ public class Server {
                 while(iterator.hasNext()) {
                     SelectionKey key = iterator.next();
 
-                    if(key.isAcceptable()) { acceptKey(serverSocketChannel, selector); }
-                    if(key.isReadable()) { readKey(key, selector); }
-                    if(key.isWritable()) { writeKey(key, selector); }
+                    if(key.isValid() && key.isAcceptable()) { acceptKey(serverSocketChannel, selector); }
+                    if(key.isValid() && key.isReadable()) { readKey(key, selector); }
+                    if(key.isValid() && key.isWritable()) { writeKey(key, selector); }
+
                     iterator.remove();
                 }
             }

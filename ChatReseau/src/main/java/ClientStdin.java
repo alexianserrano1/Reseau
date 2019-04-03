@@ -21,11 +21,6 @@ public class ClientStdin implements Runnable {
                             socket.getOutputStream()));
             Scanner inFromUser = new Scanner(System.in);
 
-            System.out.print("Entrez votre pseudo: ");
-            String pseudo = inFromUser.next();
-            outToServer.write("CONNECT "+ pseudo +"\n");
-            outToServer.flush();
-
             while(inFromUser.hasNextLine()) {
                 semaphore.acquire();
                 if(socket.isClosed()) {
