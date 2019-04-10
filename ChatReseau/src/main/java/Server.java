@@ -9,7 +9,8 @@ import java.util.Set;
 
 public class Server {
     ArrayList<ConnectionProfil> profiles = new ArrayList<>();
-    ByteBuffer buffer = ByteBuffer.allocate(256);
+    ByteBuffer readBuffer = ByteBuffer.allocate(256);
+    ByteBuffer writeBuffer = ByteBuffer.allocate(256);
 
     private String getMessage(ByteBuffer buffer) {
         String msg = new String(buffer.array());
@@ -40,14 +41,13 @@ public class Server {
     }
 
     private boolean bufferIsEmpty(ConnectionProfil p) throws IOException {
-        return (p.getSocket().read(buffer) < 0);
+        return (p.getSocket().read(readBuffer) < 0);
     }
 
     private void readMessage(ConnectionProfil profile, Selector s) throws IOException {
-        String messageRecv = getMessage(buffer);
+        String messageRecv = getMessage(readBuffer);
         if (!messageRecv.equals("")) {
             String pseudo;
-            System.out.println(messageRecv);
             if (messageRecv.startsWith("CONNECT")) {
                 if (profile.isConnected) {
                     profile.addMsgToQueue("SERVER: ERROR CONNECT aborting clavardamu protocol.\n");
@@ -58,6 +58,7 @@ public class Server {
                     profile.setConnected();
                     profile.getSocket().register(s, SelectionKey.OP_READ | SelectionKey.OP_WRITE, profile);
                     broadcastExcept(profile, "SERVER: Connexion de " + pseudo + "\n");
+                    System.out.println("Connexion "+pseudo);
                 }
             }
             else if(messageRecv.startsWith("MSG")){
@@ -66,16 +67,12 @@ public class Server {
                     broadcastExcept(profile, pseudo + "> " + messageRecv.substring(4)+"\n");
                 }
                 else {
-                    System.out.println("11111111");
                     profile.addMsgToQueue("SERVER: ERROR clavardamu.\n");
                 }
             }
-            else {
-                System.out.println("22222222");
-
-                profile.addMsgToQueue("SERVER: ERROR clavardamu.\n"); }
+            else { profile.addMsgToQueue("SERVER: ERROR clavardamu.\n"); }
         }
-        buffer.flip();
+        readBuffer.flip();
     }
 
     private void readKey(SelectionKey key, Selector s) throws IOException {
@@ -83,22 +80,23 @@ public class Server {
 
         if(bufferIsEmpty(profile)) {
             profile.isConnected = false;
+            System.out.println("Deconnexion "+profile.getPseudo());
             profiles.remove(profile);
             profile.getSocket().close();
             return;
         }
         else { readMessage(profile, s); }
-        buffer.clear();
+        readBuffer.clear();
     }
 
     private void writeKey(SelectionKey key, Selector s) throws IOException {
         ConnectionProfil profil = (ConnectionProfil) key.attachment();
         String msg = profil.popMessage();
         if (msg != null) {
-            buffer.clear();
-            buffer.put(msg.getBytes());
-            buffer.flip();
-            profil.getSocket().write(buffer);
+            writeBuffer.clear();
+            writeBuffer.put(msg.getBytes());
+            writeBuffer.flip();
+            profil.getSocket().write(writeBuffer);
         }
         if(profil.queue.isEmpty())
             key.interestOps(SelectionKey.OP_READ);
